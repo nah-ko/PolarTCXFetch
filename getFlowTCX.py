@@ -19,3 +19,13 @@ activities = requests.get("https://flow.polar.com/training/getCalendarEvents?sta
                           cookies=login.cookies  )
 
 #Get information only from 'EXERCISE' type activities found by:   activities.json[x]['type']
+for activity in activities.json:
+    if activity['type'] == 'EXERCISE':
+        print("Fetch activity from: %s (ID: %s), TCX Url: https://flow.polar.com/%s/export/tcx" % (activity['datetime'],  activity['listItemId'],  activity['url']))
+        tcxFile = requests.get("https://flow.polar.com/%s/export/tcx" % activity['url'], 
+                               cookies=login.cookies
+        )
+        filename = "%s_%s.tcx" % (activity['listItemId'],  activity['datetime'])
+        # Save the file locally, just in case.
+        with file("archives/" + filename, "w") as f:
+            f.write(resp.text.encode("UTF-8"))
