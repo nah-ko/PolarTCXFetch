@@ -3,8 +3,8 @@ import datetime
 import requests
 import json
 
-with open("settings.json", "r") as file:
-    settings = json.load(file)
+with open("settings.json", "r") as f:
+    settings = json.load(f)
 
 startDate = "01.03.2015"
 endDate  = "01.04.2015"
@@ -25,7 +25,7 @@ for activity in activities.json:
         tcxFile = requests.get("https://flow.polar.com/%s/export/tcx" % activity['url'], 
                                cookies=login.cookies
         )
-        filename = "%s_%s.tcx" % (activity['listItemId'],  activity['datetime'])
+        filename = "%s_%s.tcx" % (activity['listItemId'],  activity['datetime'].split('T')[0])
         # Save the file locally, just in case.
         with file("archives/" + filename, "w") as f:
-            f.write(resp.text.encode("UTF-8"))
+            f.write(tcxFile.text.encode("UTF-8"))
