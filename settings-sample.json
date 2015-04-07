@@ -1,4 +1,5 @@
 {
     "polarflow_email" : "user@dom.tld",
-    "polarflow_pass"  : "blah"
+    "polarflow_pass"  : "blah",
+    "sync_days"       : 60
 }
