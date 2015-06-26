@@ -38,8 +38,8 @@ activities = requests.get("https://flow.polar.com/training/getCalendarEvents?sta
 #Get information only from 'EXERCISE' type activities found by:   activities.json[x]['type']
 for activity in activities.json:
     if activity['type'] == 'EXERCISE':
-        print("Fetch activity from: %s (ID: %s), TCX Url: https://flow.polar.com%s/export/tcx" % (activity['datetime'],  activity['listItemId'],  activity['url']))
-        tcxFile = requests.get("https://flow.polar.com%s/export/tcx" % activity['url'], 
+        print("Fetch activity from: %s (ID: %s), TCX Url: https://flow.polar.com%s/export/tcx/true" % (activity['datetime'],  activity['listItemId'],  activity['url']))
+        tcxFile = requests.get("https://flow.polar.com%s/export/tcx/true" % activity['url'], 
                                cookies=login.cookies
         )
         # Polar Flow exports activities in zipfiles, so we need to get it and then extract all files.
