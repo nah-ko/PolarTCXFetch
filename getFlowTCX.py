@@ -36,7 +36,8 @@ activities = requests.get("https://flow.polar.com/training/getCalendarEvents?sta
                           cookies=login.cookies  )
 
 #Get information only from 'EXERCISE' type activities found by:   activities.json[x]['type']
-for activity in activities.json:
+# 4 Jul 2015: activities.json no longer work (no reason)
+for activity in json.loads(activities.content):
     if activity['type'] == 'EXERCISE':
         print("Fetch activity from: %s (ID: %s), TCX Url: https://flow.polar.com%s/export/tcx/true" % (activity['datetime'],  activity['listItemId'],  activity['url']))
         tcxFile = requests.get("https://flow.polar.com%s/export/tcx/true" % activity['url'], 
