@@ -4,6 +4,8 @@ import requests
 import json
 import zipfile
 import StringIO
+import os
+from lxml import objectify
 
 with open("settings.json", "r") as f:
     settings = json.load(f)
@@ -43,10 +45,25 @@ for activity in json.loads(activities.content):
         tcxFile = requests.get("https://flow.polar.com%s/export/tcx/true" % activity['url'], 
                                cookies=login.cookies
         )
+        # Make sure there is a directory where to download files, if not we'll create it
+        archivesDir = "archives/"
+        if not os.path.exists(archivesDir):
+            os.mkdir(archivesDir)
         # Polar Flow exports activities in zipfiles, so we need to get it and then extract all files.
         try:
             zipDoc = zipfile.ZipFile(StringIO.StringIO(tcxFile.content))
         except:
             print("Error extracting file: not a zip file")
             continue
-        zipDoc.extractall("archives/")
+        zipDoc.extractall(archivesDir)
+        tcxFileName = zipDoc.filelist[0].filename
+        # Extract activity type from TCX file, value is stored into <Activity> tag, by "Sport" attribute.
+        tcxTree = objectify.parse(archivesDir+tcxFileName)
+        Root = tcxTree.getroot()
+        Activity = Root.Activities.Activity
+        ActivityType = Activity.attrib['Sport']
+        # If ActivityType is "Other", then we know that Polar give real sport name information in filename
+        if ActivityType == 'Other':
+            tcxFileName_Right = tcxFileName.split('_')[1]
+            ActivityType = str(tcxFileName_Right.split('.')[0])
+        print("Activity (type: {}) saved to: {}/{}".format(ActivityType,  archivesDir,  tcxFileName))
