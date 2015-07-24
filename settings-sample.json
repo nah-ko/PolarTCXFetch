@@ -1,5 +1,6 @@
 {
     "polarflow_email" : "user@dom.tld",
     "polarflow_pass"  : "blah",
-    "sync_days"       : 60
+    "sync_days"       : 60,
+    "archives_dir"    : "archives/" 
 }
