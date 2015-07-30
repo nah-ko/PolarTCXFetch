@@ -81,5 +81,8 @@ for activity in json.loads(activities.content):
             print("Activity (type: {}) saved to: {}/{}".format(ActivityType,  destDir,  tcxFileName))
         except (shutil.Error,  IOError, os.error), why:
             print("Unable to move {} to {} because of error: {}".format(sourceFile, destDir, str(why)))
+            if why.find('already exists') != -1:
+                print("Removing existing file {}".format(tcxFileName))
+                shutil.remove(sourceFile)
 
 print("Every training file is yours !")
