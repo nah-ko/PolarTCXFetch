@@ -49,7 +49,7 @@ activities = requests.get("https://flow.polar.com/training/getCalendarEvents?sta
 # 4 Jul 2015: activities.json no longer work (no reason)
 print("Fetch {} activities.".format(activities.content.count('EXERCISE')))
 for activity in json.loads(activities.content):
-    if activity['type'] == 'EXERCISE' and activity['listItemId'] not in historicIDs:
+    if activity['type'] == 'EXERCISE' and str(activity['listItemId']) not in historicIDs:
         print("Fetch activity from: %s (ID: %s);\n\tTCX Url: https://flow.polar.com%s/export/tcx/true" % (activity['datetime'],  activity['listItemId'],  activity['url']))
         tcxFile = requests.get("https://flow.polar.com%s/export/tcx/true" % activity['url'], 
                                cookies=login.cookies
@@ -94,4 +94,4 @@ for activity in json.loads(activities.content):
                 print("Removing existing file {}".format(tcxFileName))
                 os.remove(sourceFile)
 
-print("Every training file is yours !")
+print("Every training file downloaded, enjoy !")
