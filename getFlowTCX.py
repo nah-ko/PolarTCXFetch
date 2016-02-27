@@ -27,23 +27,33 @@ fd.close()
 myHeaders = {'user-agent':  'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'}
 
 print("Connecting to Polar Flow webapp...")
-login = requests.post("https://flow.polar.com/login", 
+try:
+    login = requests.post("https://flow.polar.com/login", 
                       data={"email":settings['polarflow_email'],"password":settings['polarflow_pass']}, 
-                      headers=myHeaders)
-login.raise_for_status()
+                      headers=myHeaders, verify=False)
+except:
+    print("Error raised")
+    #login.raise_for_status()
+
 #if login.raise_for_status():
 #    print("Ooopss!! Something went wrong...\nError is: {}".format(login.raise_for_status()))
 #    exit(1)
 
-# Read historic IDs file
-with open("historyFetch.dat",  "r") as fd:
-    data = fd.read()
-    historicIDs = data.split('\n')
+# Read historic IDs file : if exists, else begin with empty historic.
+if os.path.exists("historyFetch.dat"):
+    with open("historyFetch.dat", "r") as fd:
+        data = fd.read()
+        historicIDs = data.split('\n')
+else:
+    historicIDs = "" 
 
 print("Connected!\nRequesting last unsync activities since {}...".format(startDate))
 
-activities = requests.get("https://flow.polar.com/training/getCalendarEvents?start=%s&end=%s" % (startDate,  endDate), 
-                          cookies=login.cookies  )
+try:
+    activities = requests.get("https://flow.polar.com/training/getCalendarEvents?start=%s&end=%s" % (startDate,  endDate), 
+                          cookies=login.cookies, verify = False)
+except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as ErrorMsg:
+    print("Error raised: {}".format(str(ErrorMsg)))
 
 #Get information only from 'EXERCISE' type activities found by:   activities.json[x]['type']
 # 4 Jul 2015: activities.json no longer work (no reason)
@@ -52,7 +62,7 @@ for activity in json.loads(activities.content):
     if activity['type'] == 'EXERCISE' and str(activity['listItemId']) not in historicIDs:
         print("Fetch activity from: %s (ID: %s);\n\tTCX Url: https://flow.polar.com%s/export/tcx/true" % (activity['datetime'],  activity['listItemId'],  activity['url']))
         tcxFile = requests.get("https://flow.polar.com%s/export/tcx/true" % activity['url'], 
-                               cookies=login.cookies
+                               cookies=login.cookies, verify = False
         )
         # Write listItemId into historyFetch.dat in order to don't look for already downloaded TCX file
         fd = open("historyFetch.dat",  "a")
@@ -87,9 +97,9 @@ for activity in json.loads(activities.content):
                 os.mkdir(destDir)
             shutil.move(sourceFile, destDir)
             print("Activity (type: {}) saved to: {}/{}".format(ActivityType,  destDir,  tcxFileName))
-        except (shutil.Error,  IOError, os.error), why:
+        except (shutil.Error,  IOError, os.error) as why:
             print("Unable to move {} to {} because of error: {}".format(sourceFile, destDir, str(why)))
-	    err = str(why)
+            err = str(why)
             if err.find('already exists') != -1:
                 print("Removing existing file {}".format(tcxFileName))
                 os.remove(sourceFile)
